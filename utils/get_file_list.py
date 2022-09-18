@@ -6,9 +6,8 @@ def get_file_list(path):
     file_list = []
 
     for file in os.listdir(path):
-        if file.endswith(".java"):
-            file_list.append(file)
-    
+        file_list.append(file)
+
     file_list = natsort.natsorted(file_list)
 
     return file_list
