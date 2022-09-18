@@ -1,6 +1,8 @@
 .DS_Store
 config.py
 test.py
+result.docx
+result.hwp
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
