@@ -36,22 +36,25 @@ for file in file_list:
     code_date.close()
 
     # 문제 제목 뽑아내기
-    cell_title = file.split("_")
-    chapter = re.sub(r'[^0-9]', '', cell_title[0])
-    number = re.sub(r'[^0-9]', '', cell_title[1])
+    temp = file.split("_")
+    after_list = []
+    for i in temp:
+        after_list.append(re.sub(r'[^0-9]', '', i))
+
+    cell_title = ".".join(after_list)
 
     LOGGER.info(f"{file} - 작성 중. . .")
 
     # 문제 제목 넣기 - ex. 1.1
     p = document.add_heading(level=1)
-    wp = p.add_run(f'{chapter}.{number}')
+    wp = p.add_run(cell_title)
     wp.font.size = Pt(20) # 글자 크기 조절
     wp.font.color.rgb = RGBColor(0, 0, 0) # 글자 색깔 검정색으로
 
     # 테이블 작성
     table = document.add_table(rows=1, cols=1)
     table.style = "Table Grid"
-    
+
     hdr_cells = table.rows[0].cells
     hdr_cells[0].text = code
     row_cells = table.add_row().cells
