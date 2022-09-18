@@ -9,6 +9,8 @@ from docx.shared import RGBColor, Pt
 
 from utils.get_file_list import get_file_list
 
+version = "1.0.1"
+
 # enable logging
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
