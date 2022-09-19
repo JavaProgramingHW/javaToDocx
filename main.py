@@ -13,7 +13,7 @@ from utils.get_command import get_command
 from utils.get_java_response import get_java_response, get_java_pk_response
 from utils.get_image import get_image
 
-version = "1.1.1"
+version = "1.1.2"
 
 if not os.path.exists("image"):
     os.makedirs("image")
@@ -28,6 +28,7 @@ path = input("대상 경로를 입력하세요 : ")
 name = input("학번과 이름을 입력하세요(ex. 20220101 홍길동) : ")
 
 file_list = get_file_list(path)
+LOGGER.info(f"Version {version}")
 LOGGER.info(f"대상 파일 리스트 - {file_list}")
 
 document = Document()
