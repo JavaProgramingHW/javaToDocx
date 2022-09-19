@@ -15,9 +15,6 @@ from utils.get_image import get_image
 
 version = "1.1.2"
 
-if not os.path.exists("image"):
-    os.makedirs("image")
-
 # enable logging
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
