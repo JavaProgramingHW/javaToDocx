@@ -13,7 +13,7 @@ from utils.get_command import get_command
 from utils.get_java_response import get_java_response, get_java_pk_response
 from utils.get_image import get_image
 
-version = "1.1.0"
+version = "1.1.1"
 
 if not os.path.exists("image"):
     os.makedirs("image")
@@ -89,6 +89,11 @@ for file in file_list:
                 end_index, command = get_command(code)
                 result = ""
                 result = get_java_pk_response(path, file, command)
+                
+                # 커맨드 적은 주석 제거
+                if end_index is not None:
+                    temp_code = code.split("\n")
+                    code = "\n".join(temp_code[end_index+1:])
 
                 hdr_cells = table.rows[0].cells
                 hdr_cells[0].text = f"//{i[1]}\n\n{code}"
@@ -118,6 +123,7 @@ for file in file_list:
         result = ""
         result = get_java_response(temp_path, file, command)
 
+        # 커맨드 적은 주석 제거
         if end_index is not None:
             temp_code = code.split("\n")
             code = "\n".join(temp_code[end_index+1:])
