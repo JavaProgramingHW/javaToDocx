@@ -24,11 +24,12 @@ logging.basicConfig(
     level=logging.INFO)
 LOGGER = logging.getLogger(__name__)
 
+LOGGER.info(f"Version {version}")
+
 path = input("대상 경로를 입력하세요 : ")
 name = input("학번과 이름을 입력하세요(ex. 20220101 홍길동) : ")
 
 file_list = get_file_list(path)
-LOGGER.info(f"Version {version}")
 LOGGER.info(f"대상 파일 리스트 - {file_list}")
 
 document = Document()
