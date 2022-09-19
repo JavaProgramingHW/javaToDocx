@@ -13,7 +13,7 @@ from utils.get_command import get_command
 from utils.get_java_response import get_java_response, get_java_pk_response
 from utils.get_image import get_image
 
-version = "1.0.1"
+version = "1.1.0"
 
 if not os.path.exists("image"):
     os.makedirs("image")
