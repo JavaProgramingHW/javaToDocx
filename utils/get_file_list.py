@@ -6,7 +6,8 @@ def get_file_list(path):
     file_list = []
 
     for file in os.listdir(path):
-        file_list.append(file)
+        if file != ".DS_Store" and not file.endswith(".class"):
+            file_list.append(file)
 
     file_list = natsort.natsorted(file_list)
 

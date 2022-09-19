@@ -2,14 +2,21 @@
 # from docx.shared import Inches
 # document.add_picture('path', width=Inches(1.25))
 
+import os
 import re
 import logging
 from docx import Document
-from docx.shared import RGBColor, Pt
+from docx.shared import RGBColor, Pt, Inches
 
 from utils.get_file_list import get_file_list
+from utils.get_command import get_command
+from utils.get_java_response import get_java_response, get_java_pk_response
+from utils.get_image import get_image
 
 version = "1.0.1"
+
+if not os.path.exists("image"):
+    os.makedirs("image")
 
 # enable logging
 logging.basicConfig(
@@ -67,7 +74,7 @@ for file in file_list:
         # 리스트의 맨 앞에 추가
         if file_java_exist:
             temp_file_list_processing.insert(0, f"{file}.java")
-                
+
         # 테이블 작성
         table = document.add_table(rows=1, cols=1)
         table.style = "Table Grid"
@@ -79,13 +86,27 @@ for file in file_list:
             code_date.close()
 
             if i[1] == f"{file}.java":
+                end_index, command = get_command(code)
+                result = ""
+                result = get_java_pk_response(path, file, command)
+
                 hdr_cells = table.rows[0].cells
                 hdr_cells[0].text = f"//{i[1]}\n\n{code}"
             else:
                 row_cells = table.add_row().cells
                 row_cells[0].text = f"//{i[1]}\n\n{code}"
+
         row_cells = table.add_row().cells
-        #row_cells[0].text = 결과 이미지 추가 업데이트 예정
+
+        # 이미지 경로 가져오기
+        image_path = get_image(result, file)
+
+        paragraph = row_cells[0].paragraphs[0]
+        run = paragraph.add_run()
+        run.add_picture(image_path)
+
+        if os.path.exists(image_path):
+            os.remove(image_path)
 
     else:
         # 코드 가져오기
@@ -93,14 +114,32 @@ for file in file_list:
         code = code_date.read()
         code_date.close()
 
+        end_index, command = get_command(code)
+        result = ""
+        result = get_java_response(temp_path, file, command)
+
+        if end_index is not None:
+            temp_code = code.split("\n")
+            code = "\n".join(temp_code[end_index+1:])
+
         # 테이블 작성
         table = document.add_table(rows=1, cols=1)
         table.style = "Table Grid"
 
         hdr_cells = table.rows[0].cells
         hdr_cells[0].text = code
+        
         row_cells = table.add_row().cells
-        #row_cells[0].text = 결과 이미지 추가 업데이트 예정
+
+        # 이미지 경로 가져오기
+        image_path = get_image(result, file)
+
+        paragraph = row_cells[0].paragraphs[0]
+        run = paragraph.add_run()
+        run.add_picture(image_path)
+
+        if os.path.exists(image_path):
+            os.remove(image_path)
 
     LOGGER.info(f"{file} - 작성 완료!")
 
