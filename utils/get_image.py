@@ -7,6 +7,11 @@ async def from_carbon(result, file, client):
     return img
 
 def get_image(result, file):
-    client = Carbon(language="Plain Text")
+    client = Carbon(
+        language="Plain Text",
+        colour="rgba(255, 255, 255, 100)",
+        horizontal_padding="10px",
+        vertical_padding="10px"
+    )
     path = asyncio.run(from_carbon(result, file, client))
     return path

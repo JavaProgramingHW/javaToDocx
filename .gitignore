@@ -3,6 +3,7 @@ config.py
 test.py
 result.docx
 result.hwp
+~$result.docx
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

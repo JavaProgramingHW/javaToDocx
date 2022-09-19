@@ -6,7 +6,7 @@ import os
 import re
 import logging
 from docx import Document
-from docx.shared import RGBColor, Pt, Inches
+from docx.shared import RGBColor, Pt
 
 from utils.get_file_list import get_file_list
 from utils.get_command import get_command
