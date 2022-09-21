@@ -23,8 +23,8 @@ LOGGER = logging.getLogger(__name__)
 
 LOGGER.info(f"Version {version}")
 
-path = input("대상 경로를 입력하세요 : ")
-name = input("학번과 이름을 입력하세요(ex. 20220101 홍길동) : ")
+path = input("대상 경로를 입력하세요 : ").strip()
+name = input("학번과 이름을 입력하세요(ex. 20220101 홍길동) : ").strip()
 
 file_list = get_file_list(path)
 LOGGER.info(f"대상 파일 리스트 - {file_list}")
@@ -125,7 +125,7 @@ for file in file_list:
         # 커맨드 적은 주석 제거
         if end_index is not None:
             temp_code = code.split("\n")
-            code = "\n".join(temp_code[end_index+1:])
+            code = "\n".join(temp_code[end_index + 1:])
 
         # 테이블 작성
         table = document.add_table(rows=1, cols=1)

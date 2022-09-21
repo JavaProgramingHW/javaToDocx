@@ -11,7 +11,8 @@ def get_image(result, file):
         language="Plain Text",
         colour="rgba(255, 255, 255, 100)",
         horizontal_padding="10px",
-        vertical_padding="10px"
+        vertical_padding="10px",
+        window_controls=True,
     )
     path = asyncio.run(from_carbon(result, file, client))
     return path
