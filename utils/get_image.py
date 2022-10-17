@@ -2,11 +2,11 @@ import asyncio
 
 from carbon import Carbon
 
-async def from_carbon(result, file, client):
+async def from_carbon(result, client):
     img = await client.create(result)
     return img
 
-def get_image(result, file):
+def get_image(result):
     client = Carbon(
         language="Plain Text",
         colour="rgba(255, 255, 255, 100)",
@@ -14,5 +14,5 @@ def get_image(result, file):
         vertical_padding="10px",
         window_controls=True,
     )
-    path = asyncio.run(from_carbon(result, file, client))
+    path = asyncio.run(from_carbon(result, client))
     return path

@@ -6,7 +6,7 @@ def get_java_pk_response(path, file_name, command):
     result = ""
     child = pexpect.spawn(f'javac {file_name}/{file_name}.java', cwd=path)
     javac = child.read()
-    child = pexpect.spawn(f'java {file_name}/{file_name}.java', cwd=path, encoding='utf-8')
+    child = pexpect.spawn(f'java {file_name}/{file_name}', cwd=path, encoding='utf-8')
 
     if command is not None:
         for msg in command:

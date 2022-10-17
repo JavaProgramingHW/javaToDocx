@@ -12,8 +12,9 @@ from utils.get_file_list import get_file_list
 from utils.get_command import get_command
 from utils.get_java_response import get_java_response, get_java_pk_response
 from utils.get_image import get_image
+from utils.misc import get_compile_command
 
-version = "1.1.2"
+version = "1.1.3"
 
 # enable logging
 logging.basicConfig(
@@ -21,7 +22,10 @@ logging.basicConfig(
     level=logging.INFO)
 LOGGER = logging.getLogger(__name__)
 
-LOGGER.info(f"Version {version}")
+os.system("java --version")
+print()
+LOGGER.info(f"javaToDocx Version {version}")
+LOGGER.info("Made by @ajb3296")
 
 path = input("대상 경로를 입력하세요 : ").strip()
 name = input("학번과 이름을 입력하세요(ex. 20220101 홍길동) : ").strip()
@@ -102,8 +106,12 @@ for file in file_list:
 
         row_cells = table.add_row().cells
 
+        # 터미널로 속이기
+        print(result)
+        compile_command = get_compile_command(temp_path, file, result)
+
         # 이미지 경로 가져오기
-        image_path = get_image(result, file)
+        image_path = get_image(compile_command)
 
         paragraph = row_cells[0].paragraphs[0]
         run = paragraph.add_run()
@@ -136,8 +144,11 @@ for file in file_list:
         
         row_cells = table.add_row().cells
 
+        # 터미널로 속이기
+        compile_command = get_compile_command(temp_path, file, result)
+
         # 이미지 경로 가져오기
-        image_path = get_image(result, file)
+        image_path = get_image(compile_command)
 
         paragraph = row_cells[0].paragraphs[0]
         run = paragraph.add_run()
