@@ -1,5 +1,3 @@
-# /Users/anjaebeom/Desktop/금오공대/1학년/2학기/자바프로그래밍/java/jp5/src
-
 import getpass
 import platform
 
