@@ -14,7 +14,7 @@ from utils.get_java_response import get_java_response, get_java_pk_response
 from utils.get_image import get_image
 from utils.misc import get_compile_command
 
-version = "1.1.4"
+version = "1.2.0"
 
 # enable logging
 logging.basicConfig(
@@ -26,9 +26,12 @@ os.system("java --version")
 print()
 LOGGER.info(f"javaToDocx Version {version}")
 LOGGER.info("Made by @ajb3296")
-
+print()
 path = input("대상 경로를 입력하세요 : ").strip()
-name = input("학번과 이름을 입력하세요(ex. 20220101 홍길동) : ").strip()
+homework_name = input("과제명을 입력하세요 : ").strip()
+grade = input("학년을 입력하세요(ex. 1) : ").strip()
+studentID = input("학번을 입력하세요(ex. 20220101) : ").strip()
+name = input("이름을 입력하세요(ex. 홍길동) : ").strip()
 
 file_list = get_file_list(path)
 LOGGER.info(f"대상 파일 리스트 - {file_list}")
@@ -36,7 +39,11 @@ LOGGER.info(f"대상 파일 리스트 - {file_list}")
 document = Document()
 
 p = document.add_heading(level=0)
-wp = p.add_run(name)
+wp = p.add_run("자바프로그래밍")
+wp.font.color.rgb = RGBColor(0, 0, 0)
+
+p = document.add_heading(level=2)
+wp = p.add_run(f"금오공과대학교 컴퓨터소프트웨어공학과\n{grade}학년 {studentID} {name}")
 wp.font.color.rgb = RGBColor(0, 0, 0)
 
 for file in file_list:
@@ -82,6 +89,10 @@ for file in file_list:
         table = document.add_table(rows=1, cols=1)
         table.style = "Table Grid"
 
+        # 설계
+        hdr_cells = table.rows[0].cells
+        hdr_cells[0].text = f"설계 : UML class diagram"
+
         # 테이블 내용 넣기
         for i in enumerate(temp_file_list_processing):
             code_date = open(f"{temp_path}/{i[1]}", "r", encoding = 'UTF-8')
@@ -98,11 +109,9 @@ for file in file_list:
                     temp_code = code.split("\n")
                     code = "\n".join(temp_code[end_index+1:])
 
-                hdr_cells = table.rows[0].cells
-                hdr_cells[0].text = f"//{i[1]}\n\n{code}"
-            else:
-                row_cells = table.add_row().cells
-                row_cells[0].text = f"//{i[1]}\n\n{code}"
+            # 코드
+            row_cells = table.add_row().cells
+            row_cells[0].text = f"//{i[1]}\n\n{code}"
 
         row_cells = table.add_row().cells
 
@@ -119,6 +128,12 @@ for file in file_list:
 
         if os.path.exists(image_path):
             os.remove(image_path)
+        
+        row_cells = table.add_row().cells
+        row_cells[0].text = f"난이도 : 중"
+
+        row_cells = table.add_row().cells
+        row_cells[0].text = f"완성도 : 정상 실행됨"
 
     else:
         # 코드 가져오기
@@ -139,8 +154,13 @@ for file in file_list:
         table = document.add_table(rows=1, cols=1)
         table.style = "Table Grid"
 
+        # 설계
         hdr_cells = table.rows[0].cells
-        hdr_cells[0].text = code
+        hdr_cells[0].text = f"설계 : UML class diagram"
+
+        # 코드
+        row_cells = table.add_row().cells
+        row_cells[0].text = code
         
         row_cells = table.add_row().cells
 
@@ -156,6 +176,12 @@ for file in file_list:
 
         if os.path.exists(image_path):
             os.remove(image_path)
+        
+        row_cells = table.add_row().cells
+        row_cells[0].text = f"난이도 : 중"
+
+        row_cells = table.add_row().cells
+        row_cells[0].text = f"완성도 : 정상 실행됨"
 
     LOGGER.info(f"{file} - 작성 완료!")
 

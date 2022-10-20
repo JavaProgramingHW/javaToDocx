@@ -1,6 +1,11 @@
 import sys
 import time
-import pexpect
+import platform
+
+if platform.system() == "Windows":
+    import wexpect as pexpect
+else:
+    import pexpect
 
 def get_java_pk_response(path, file_name, command):
     result = ""
