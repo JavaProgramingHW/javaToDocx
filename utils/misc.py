@@ -22,5 +22,5 @@ def get_compile_command(path, file, result):
         result_path = print_path
 
     platform_node = platform.node().replace(".local", "")
-    result = f"{getpass.getuser()}@{platform_node}-ui-MacBookPro {result_path} $ java {file}\n{result}"
+    result = f"{getpass.getuser()}@{platform_node} {result_path} $ java {file}\n{result}"
     return result
