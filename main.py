@@ -14,7 +14,7 @@ from utils.get_java_response import get_java_response, get_java_pk_response
 from utils.get_image import get_image
 from utils.misc import get_compile_command
 
-version = "1.1.3"
+version = "1.1.4"
 
 # enable logging
 logging.basicConfig(
