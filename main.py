@@ -4,7 +4,10 @@
 
 import os
 import re
+import json
+import shutil
 import logging
+import datetime
 from docx import Document
 from docx.shared import RGBColor, Pt
 
@@ -13,8 +16,11 @@ from utils.get_command import get_command
 from utils.get_java_response import get_java_response, get_java_pk_response
 from utils.get_image import get_image
 from utils.misc import get_compile_command
+from utils.uml import get_uml_image
 
-version = "1.2.0"
+version = "1.2.1"
+
+userdata_path = "userdata.json"
 
 # enable logging
 logging.basicConfig(
@@ -29,9 +35,39 @@ LOGGER.info("Made by @ajb3296")
 print()
 path = input("대상 경로를 입력하세요 : ").strip()
 homework_name = input("과제명을 입력하세요 : ").strip()
-grade = input("학년을 입력하세요(ex. 1) : ").strip()
-studentID = input("학번을 입력하세요(ex. 20220101) : ").strip()
-name = input("이름을 입력하세요(ex. 홍길동) : ").strip()
+
+
+grade = None
+studentID = None
+name = None
+
+if os.path.exists(userdata_path):
+    file = open(userdata_path, "r", encoding = 'UTF-8')
+    data = file.read()
+    file.close()
+    json_object = json.loads(data)
+    if json_object["year"] == str(datetime.datetime.now().year):
+        grade = json_object["grade"]
+        studentID = json_object["studentID"]
+        name = json_object["name"]
+
+if name is None:
+    grade = input("학년을 입력하세요(ex. 1) : ").strip()
+    studentID = input("학번을 입력하세요(ex. 20220101) : ").strip()
+    name = input("이름을 입력하세요(ex. 홍길동) : ").strip()
+
+    file = open(userdata_path, "w", encoding = 'UTF-8')
+    file.write(f"""{{
+    "year": "{datetime.datetime.today().year}",
+    "grade": "{grade}",
+    "studentID": "{studentID}",
+    "name": "{name}"
+}}
+""")
+    file.close()
+
+else:
+    ...
 
 file_list = get_file_list(path)
 LOGGER.info(f"대상 파일 리스트 - {file_list}")
@@ -41,8 +77,11 @@ document = Document()
 p = document.add_heading(level=0)
 wp = p.add_run("자바프로그래밍")
 wp.font.color.rgb = RGBColor(0, 0, 0)
+p = document.add_heading(level=1)
+wp = p.add_run(homework_name)
+wp.font.color.rgb = RGBColor(0, 0, 0)
 
-p = document.add_heading(level=2)
+p = document.add_heading(level=3)
 wp = p.add_run(f"금오공과대학교 컴퓨터소프트웨어공학과\n{grade}학년 {studentID} {name}")
 wp.font.color.rgb = RGBColor(0, 0, 0)
 
@@ -90,8 +129,31 @@ for file in file_list:
         table.style = "Table Grid"
 
         # 설계
+        # temp_path 가 복사할 폴더
+        try:
+            shutil.rmtree(file)
+        except FileNotFoundError:
+            pass
+
+        shutil.copytree(temp_path, file)
+        imgfile_name = get_uml_image(file)
+        img_path = f"{file}/{imgfile_name}"
+
+        # 테이블에 UML class diagram 이미지 추가
         hdr_cells = table.rows[0].cells
-        hdr_cells[0].text = f"설계 : UML class diagram"
+
+        if os.path.exists(img_path):
+            paragraph = hdr_cells[0].paragraphs[0]
+            run = paragraph.add_run()
+            run.add_picture(img_path)
+        else:
+            hdr_cells[0].text = f"설계 : UML class diagram - 이미지 생성 실패"
+
+        # 임시폴더 제거
+        try:
+            shutil.rmtree(file)
+        except FileNotFoundError:
+            pass
 
         # 테이블 내용 넣기
         for i in enumerate(temp_file_list_processing):
@@ -156,7 +218,35 @@ for file in file_list:
 
         # 설계
         hdr_cells = table.rows[0].cells
-        hdr_cells[0].text = f"설계 : UML class diagram"
+
+        # 설계
+        # temp_path 가 복사할 폴더
+        file_for_uml = file.split(".")[0]
+        try:
+            shutil.rmtree(file_for_uml)
+        except FileNotFoundError:
+            pass
+        os.mkdir(file_for_uml)
+        
+        shutil.copy(f"{temp_path}/{file}", file_for_uml)
+        imgfile_name = get_uml_image(file_for_uml)
+        img_path = f"{file_for_uml}/{imgfile_name}"
+
+        # 테이블에 UML class diagram 이미지 추가
+        hdr_cells = table.rows[0].cells
+
+        if os.path.exists(img_path):
+            paragraph = hdr_cells[0].paragraphs[0]
+            run = paragraph.add_run()
+            run.add_picture(img_path)
+        else:
+            hdr_cells[0].text = f"설계 : UML class diagram - 이미지 생성 실패"
+
+        # 임시폴더 제거
+        try:
+            shutil.rmtree(file_for_uml)
+        except FileNotFoundError:
+            pass
 
         # 코드
         row_cells = table.add_row().cells

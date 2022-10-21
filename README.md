@@ -33,3 +33,12 @@ python3 main.py
 
 * 한글이 없으면?
 -> 돈내고 사. 없으면 어차피 과제 못하잖아
+
+### Opensource
+
+* [UML-Parser](https://github.com/SnehaVM/UML-Parser)
+* [carbon-api](https://github.com/StarkBotsIndustries/Carbon)
+* [pexpect](https://github.com/pexpect/pexpect)
+* [wexpect](https://github.com/raczben/wexpect)
+* [natsort](https://github.com/SethMMorton/natsort)
+* [python-docx](https://github.com/python-openxml/python-docx)
