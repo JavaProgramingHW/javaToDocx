@@ -37,6 +37,7 @@ python3 main.py
 ### Opensource
 
 * [UML-Parser](https://github.com/SnehaVM/UML-Parser)
+* [Java2UML](https://github.com/tlqaksqhr/Java2UML)
 * [carbon-api](https://github.com/StarkBotsIndustries/Carbon)
 * [pexpect](https://github.com/pexpect/pexpect)
 * [wexpect](https://github.com/raczben/wexpect)
