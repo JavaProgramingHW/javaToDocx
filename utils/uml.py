@@ -27,8 +27,6 @@ def get_code_for_uml(path):
     return code
 
 def get_uml_image_from_viz(filename, code):
-    print(code)
-    print(filename)
     url = "http://viz-js.com/"
 
     # DRIVER_SETTING

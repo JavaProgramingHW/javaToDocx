@@ -9,7 +9,7 @@ import shutil
 import logging
 import datetime
 from docx import Document
-from docx.shared import RGBColor, Pt
+from docx.shared import RGBColor, Pt, Cm
 
 from utils.get_file_list import get_file_list
 from utils.get_command import get_command
@@ -146,11 +146,10 @@ for file in file_list:
                 # 코드 합치기
                 code = get_code_for_uml(temp_path)
                 # 코드 변환
-                MainClass = Java2UML()
-                result = str(MainClass.JavaCode2UML(code))
+                uml_result = str(Java2UML().JavaCode2UML(code))
 
                 # UML 이미지 생성
-                img_path = get_uml_image_from_viz('temp', result)
+                img_path = get_uml_image_from_viz('temp', uml_result)
             except:
                 img_path = None
 
@@ -159,7 +158,7 @@ for file in file_list:
         if img_path is not None:
             paragraph = hdr_cells[0].paragraphs[0]
             run = paragraph.add_run()
-            run.add_picture(img_path)
+            run.add_picture(img_path, width=Cm(15))
         else:
             hdr_cells[0].text = f"설계 : UML class diagram - 이미지 생성 실패"
 
@@ -203,7 +202,7 @@ for file in file_list:
 
         paragraph = row_cells[0].paragraphs[0]
         run = paragraph.add_run()
-        run.add_picture(image_path)
+        run.add_picture(image_path, width=Cm(15))
 
         if os.path.exists(image_path):
             os.remove(image_path)
@@ -252,11 +251,10 @@ for file in file_list:
         if not os.path.exists(img_path):
             try:
                 # 코드 변환
-                MainClass = Java2UML()
-                result = str(MainClass.JavaCode2UML(code))
+                uml_result = str(Java2UML().JavaCode2UML(code))
 
                 # UML 이미지 생성
-                img_path = get_uml_image_from_viz('temp.png', result)
+                img_path = get_uml_image_from_viz('temp.png', uml_result)
             except:
                 img_path = None
 
@@ -266,7 +264,7 @@ for file in file_list:
         if os.path.exists(img_path):
             paragraph = hdr_cells[0].paragraphs[0]
             run = paragraph.add_run()
-            run.add_picture(img_path)
+            run.add_picture(img_path, width=Cm(15))
         else:
             hdr_cells[0].text = f"설계 : UML class diagram - 이미지 생성 실패"
 
@@ -293,7 +291,7 @@ for file in file_list:
 
         paragraph = row_cells[0].paragraphs[0]
         run = paragraph.add_run()
-        run.add_picture(image_path)
+        run.add_picture(image_path, width=Cm(15))
 
         if os.path.exists(image_path):
             os.remove(image_path)
