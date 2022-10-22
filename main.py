@@ -16,9 +16,11 @@ from utils.get_command import get_command
 from utils.get_java_response import get_java_response, get_java_pk_response
 from utils.get_image import get_image
 from utils.misc import get_compile_command
-from utils.uml import get_uml_image
+from utils.uml import *
 
-version = "1.2.1"
+from umlib.Java2UML import Java2UML
+
+version = "1.2.2"
 
 userdata_path = "userdata.json"
 
@@ -139,10 +141,22 @@ for file in file_list:
         imgfile_name = get_uml_image(file)
         img_path = f"{file}/{imgfile_name}"
 
+        if not os.path.exists(img_path):
+            try:
+                # 코드 합치기
+                code = get_code_for_uml(temp_path)
+                # 코드 변환
+                MainClass = Java2UML()
+                result = str(MainClass.JavaCode2UML(code))
+
+                # UML 이미지 생성
+                img_path = get_uml_image_from_viz('temp', result)
+            except:
+                img_path = None
+
         # 테이블에 UML class diagram 이미지 추가
         hdr_cells = table.rows[0].cells
-
-        if os.path.exists(img_path):
+        if img_path is not None:
             paragraph = hdr_cells[0].paragraphs[0]
             run = paragraph.add_run()
             run.add_picture(img_path)
@@ -154,6 +168,9 @@ for file in file_list:
             shutil.rmtree(file)
         except FileNotFoundError:
             pass
+
+        if os.path.exists(img_path):
+            os.remove(img_path)
 
         # 테이블 내용 넣기
         for i in enumerate(temp_file_list_processing):
@@ -232,6 +249,17 @@ for file in file_list:
         imgfile_name = get_uml_image(file_for_uml)
         img_path = f"{file_for_uml}/{imgfile_name}"
 
+        if not os.path.exists(img_path):
+            try:
+                # 코드 변환
+                MainClass = Java2UML()
+                result = str(MainClass.JavaCode2UML(code))
+
+                # UML 이미지 생성
+                img_path = get_uml_image_from_viz('temp.png', result)
+            except:
+                img_path = None
+
         # 테이블에 UML class diagram 이미지 추가
         hdr_cells = table.rows[0].cells
 
@@ -247,6 +275,9 @@ for file in file_list:
             shutil.rmtree(file_for_uml)
         except FileNotFoundError:
             pass
+
+        if os.path.exists(img_path):
+            os.remove(img_path)
 
         # 코드
         row_cells = table.add_row().cells
