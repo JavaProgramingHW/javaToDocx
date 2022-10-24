@@ -20,7 +20,7 @@ from utils.uml import *
 
 from umlib.Java2UML import Java2UML
 
-version = "1.2.3"
+version = "1.2.4"
 
 userdata_path = "userdata.json"
 
