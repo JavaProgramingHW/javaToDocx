@@ -155,7 +155,7 @@ for file in file_list:
 
         # 테이블에 UML class diagram 이미지 추가
         hdr_cells = table.rows[0].cells
-        if img_path is not None:
+        if img_path is not None and os.path.exists(img_path):
             paragraph = hdr_cells[0].paragraphs[0]
             run = paragraph.add_run()
             run.add_picture(img_path, width=Cm(15))
@@ -168,8 +168,9 @@ for file in file_list:
         except FileNotFoundError:
             pass
 
-        if os.path.exists(img_path):
-            os.remove(img_path)
+        if img_path is not None:
+            if os.path.exists(img_path):
+                os.remove(img_path)
 
         # 테이블 내용 넣기
         for i in enumerate(temp_file_list_processing):
@@ -261,7 +262,7 @@ for file in file_list:
         # 테이블에 UML class diagram 이미지 추가
         hdr_cells = table.rows[0].cells
 
-        if os.path.exists(img_path):
+        if img_path is not None and os.path.exists(img_path):
             paragraph = hdr_cells[0].paragraphs[0]
             run = paragraph.add_run()
             run.add_picture(img_path, width=Cm(15))

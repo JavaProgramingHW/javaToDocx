@@ -33,8 +33,6 @@ def get_java_response(path, file_name, command):
     result = ""
     child = pexpect.spawn(f'java {file_name}', cwd=path, encoding='utf-8')
 
-    child.logfile = sys.stdout
-
     if command is not None:
         for msg in command:
             time.sleep(0.5)
@@ -47,6 +45,6 @@ def get_java_response(path, file_name, command):
                 print(child.after)
     result += child.read()
 
-    print()
+    print(result)
 
     return result

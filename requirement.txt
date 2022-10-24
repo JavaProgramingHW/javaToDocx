@@ -3,6 +3,9 @@ natsort
 pexpect
 wexpect
 carbon-api
+selenium
+webdriver_manager
+packaging
 antlr4-python3-runtime==4.7.2
 graphviz==0.10.1
 Werkzeug==0.15.3
