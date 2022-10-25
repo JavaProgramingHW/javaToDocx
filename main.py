@@ -7,7 +7,6 @@ import re
 import time
 import json
 import shutil
-import asyncio
 import logging
 import datetime
 import multiprocessing
@@ -17,11 +16,7 @@ from docx.shared import RGBColor, Pt, Cm
 from utils.get_file_list import get_file_list
 from utils.get_command import get_command
 from utils.get_java_response import get_java_response, get_java_pk_response
-from utils.get_image import get_image
-from utils.misc import get_compile_command
 from utils.uml import *
-
-from umlib.Java2UML import Java2UML, main
 
 version = "2.0.0"
 
