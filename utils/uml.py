@@ -1,5 +1,6 @@
 import os
 import base64
+import shutil
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -12,9 +13,16 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from .get_file_list import get_file_list
 
-def get_uml_image(filename):
-    img_file_name = filename + ".png"
-    os.system(f"java -jar uml/UMLParserClass.jar {filename} {img_file_name}")
+from umlib.Java2UML import Java2UML
+
+def get_uml_image(filename, img_file_name):
+    temp_img_file_name = img_file_name.replace("\\", "/").split('/')[-1]
+    os.system(f"java -jar uml/UMLParserClass.jar {filename} {temp_img_file_name}")
+    if not os.path.exists(f"{filename}/{temp_img_file_name}"):
+        return None
+    else:
+        shutil.copy(f"{filename}/{temp_img_file_name}", img_file_name)
+        os.remove(f"{filename}/{temp_img_file_name}")
     return img_file_name
 
 def get_code_for_uml(path):
@@ -56,4 +64,23 @@ def get_uml_image_from_viz(filename, code):
     with open(filename, 'wb') as f:
         f.write(imgdata)
     
+    # 웹 닫기
+    driver.quit()
+    
     return filename
+
+def download_uml_class_diagram_img(from_file, to_img):
+    # 이미지 1차 다운로드
+    imgfile_name = get_uml_image(from_file, to_img)
+
+    # 이미지 생성에 실패했을 경우
+    if imgfile_name is None:
+        # 코드 합치기
+        code = get_code_for_uml(from_file)
+        try:
+            # 코드 변환
+            uml_result = str(Java2UML().JavaCode2UML(code))
+            # UML 이미지 생성
+            imgfile_name = get_uml_image_from_viz(to_img, uml_result)
+        except:
+            pass

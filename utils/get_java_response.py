@@ -1,13 +1,17 @@
-import sys
+import os
 import time
+import shutil
 import platform
+
+from utils.get_image import get_image
+from utils.misc import get_compile_command
 
 if platform.system() == "Windows":
     import wexpect as pexpect
 else:
     import pexpect
 
-def get_java_pk_response(path, file_name, command):
+def get_java_pk_response(path, file_name, command, java_response_path):
     result = ""
     child = pexpect.spawn(f'javac {file_name}/{file_name}.java', cwd=path)
     javac = child.read()
@@ -27,9 +31,13 @@ def get_java_pk_response(path, file_name, command):
     print(result)
     print()
 
-    return result
+    compile_command = get_compile_command(path, file_name, result)
+    image_path = get_image(compile_command)
+    if image_path is not None and os.path.exists(image_path):
+        shutil.copy(image_path, f"{java_response_path}/{file_name}.png")
+        os.remove(image_path)
 
-def get_java_response(path, file_name, command):
+def get_java_response(path, file_name, command, java_response_path):
     result = ""
     child = pexpect.spawn(f'java {file_name}', cwd=path, encoding='utf-8')
 
@@ -46,5 +54,11 @@ def get_java_response(path, file_name, command):
     result += child.read()
 
     print(result)
+
+    compile_command = get_compile_command(path, file_name, result)
+    image_path = get_image(compile_command)
+    if image_path is not None and os.path.exists(image_path):
+        shutil.copy(image_path, f"{java_response_path}/{file_name}".replace(".java", ".png"))
+        os.remove(image_path)
 
     return result

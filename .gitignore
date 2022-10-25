@@ -6,6 +6,9 @@ result.hwp
 ~$result.docx
 userdata.json
 test.png
+umlimg
+temp
+console_img
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -4,10 +4,13 @@
 
 import os
 import re
+import time
 import json
 import shutil
+import asyncio
 import logging
 import datetime
+import multiprocessing
 from docx import Document
 from docx.shared import RGBColor, Pt, Cm
 
@@ -18,292 +21,318 @@ from utils.get_image import get_image
 from utils.misc import get_compile_command
 from utils.uml import *
 
-from umlib.Java2UML import Java2UML
+from umlib.Java2UML import Java2UML, main
 
-version = "1.2.4"
+version = "2.0.0"
 
-userdata_path = "userdata.json"
+class Java2Docx:
+    def __init__(self):
+        self.LOGGER = None
+        self.userdata_path = "userdata.json"
+        self.temp_folder_for_uml = "temp"
+        self.uml_img_path = "umlimg"
+        self.java_response_path = "console_img"
 
-# enable logging
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    level=logging.INFO)
-LOGGER = logging.getLogger(__name__)
+        self.path = None
+        self.targets = []
 
-os.system("java --version")
-print()
-LOGGER.info(f"javaToDocx Version {version}")
-LOGGER.info("Made by @ajb3296")
-print()
-path = input("대상 경로를 입력하세요 : ").strip()
-homework_name = input("과제명을 입력하세요 : ").strip()
+        self.document = None
 
+        self.homework_name = None
+        self.grade = None
+        self.studentID = None
+        self.name = None
+    
+    def setup(self):
+        # userdata 파일이 있을때
+        if os.path.exists(self.userdata_path):
+            file = open(self.userdata_path, "r", encoding = 'UTF-8')
+            data = file.read()
+            file.close()
+            json_object = json.loads(data)
+            if json_object["year"] == str(datetime.datetime.now().year):
+                self.grade = json_object["grade"]
+                self.studentID = json_object["studentID"]
+                self.name = json_object["name"]
 
-grade = None
-studentID = None
-name = None
+        # userdata 파일이 없을때
+        if self.name is None:
+            self.grade = input("학년을 입력하세요(ex. 1) : ").strip()
+            self.studentID = input("학번을 입력하세요(ex. 20220101) : ").strip()
+            self.name = input("이름을 입력하세요(ex. 홍길동) : ").strip()
 
-if os.path.exists(userdata_path):
-    file = open(userdata_path, "r", encoding = 'UTF-8')
-    data = file.read()
-    file.close()
-    json_object = json.loads(data)
-    if json_object["year"] == str(datetime.datetime.now().year):
-        grade = json_object["grade"]
-        studentID = json_object["studentID"]
-        name = json_object["name"]
+            file = open(self.userdata_path, "w", encoding = 'UTF-8')
+            file.write(f"""{{
+            "year": "{datetime.datetime.today().year}",
+            "grade": "{self.grade}",
+            "studentID": "{self.studentID}",
+            "name": "{self.name}"
+        }}
+        """)
+            file.close()
+        
+        self.targets = get_file_list(self.path)
+        self.LOGGER.info(f"대상 파일 리스트 - {self.targets}")
 
-if name is None:
-    grade = input("학년을 입력하세요(ex. 1) : ").strip()
-    studentID = input("학번을 입력하세요(ex. 20220101) : ").strip()
-    name = input("이름을 입력하세요(ex. 홍길동) : ").strip()
+        # 도큐먼트 선언
+        self.document = Document()
 
-    file = open(userdata_path, "w", encoding = 'UTF-8')
-    file.write(f"""{{
-    "year": "{datetime.datetime.today().year}",
-    "grade": "{grade}",
-    "studentID": "{studentID}",
-    "name": "{name}"
-}}
-""")
-    file.close()
-
-else:
-    ...
-
-file_list = get_file_list(path)
-LOGGER.info(f"대상 파일 리스트 - {file_list}")
-
-document = Document()
-
-p = document.add_heading(level=0)
-wp = p.add_run("자바프로그래밍")
-wp.font.color.rgb = RGBColor(0, 0, 0)
-p = document.add_heading(level=1)
-wp = p.add_run(homework_name)
-wp.font.color.rgb = RGBColor(0, 0, 0)
-
-p = document.add_heading(level=3)
-wp = p.add_run(f"금오공과대학교 컴퓨터소프트웨어공학과\n{grade}학년 {studentID} {name}")
-wp.font.color.rgb = RGBColor(0, 0, 0)
-
-for file in file_list:
-    LOGGER.info(f"{file} - 작성 중. . .")
-
-    document.add_page_break() # 다음 페이지로
-
-    # 문제 제목 뽑아내기
-    temp = file.split("_")
-    after_list = []
-    for i in temp:
-        after_list.append(re.sub(r'[^0-9]', '', i))
-    cell_title = ".".join(after_list)
-
-    # 문제 제목 넣기 - ex. 1.1
-    p = document.add_heading(level=1)
-    wp = p.add_run(cell_title)
-    wp.font.size = Pt(20) # 글자 크기 조절
-    wp.font.color.rgb = RGBColor(0, 0, 0) # 글자 색깔 검정색으로
+        p = self.document.add_heading(level=0)
+        wp = p.add_run("자바프로그래밍")
+        wp.font.color.rgb = RGBColor(0, 0, 0)
+        p = self.document.add_heading(level=1)
+        wp = p.add_run(self.homework_name)
+        wp.font.color.rgb = RGBColor(0, 0, 0)
+        
+        p = self.document.add_heading(level=3)
+        wp = p.add_run(f"금오공과대학교 컴퓨터소프트웨어공학과\n{self.grade}학년 {self.studentID} {self.name}")
+        wp.font.color.rgb = RGBColor(0, 0, 0)
 
 
-    temp_path = path
-    # 파일 확장자가 .java 가 아닐 경우 - 즉 패키지일 경우
-    if not file.endswith(".java"):
-        temp_path = f"{path}/{file}"
+    def make_uml_class_diagram(self):
+        # UML class diagram 이미지 저장할 임시폴더 생성
+        try:
+            shutil.rmtree(self.uml_img_path)
+        except FileNotFoundError:
+            pass
+        os.mkdir(self.uml_img_path)
 
-        temp_file_list = get_file_list(temp_path)
+        # 코드 저장할 임시폴더 생성(UML class diagram 작성을 위함)
+        try:
+            shutil.rmtree(self.temp_folder_for_uml)
+        except FileNotFoundError:
+            pass
+        os.mkdir(self.temp_folder_for_uml)
 
-        temp_file_list_processing = []
-        file_java_exist = False
-        for i in temp_file_list:
-            # 만약 폴더명과 동일한 이름의 java 파일이 아닐 경우 추가 - 이를 리스트의 맨 위에 올리기 위함
-            if i != f"{file}.java":
-                temp_file_list_processing.append(i)
+        process_list = []
+
+        for file in self.targets:
+            # 패키지일 경우
+            if not file.endswith(".java"):
+                # 폴더 째로 복사
+                shutil.copytree(f"{self.path}/{file}", f"{self.temp_folder_for_uml}/{file}")
+
+                # 임시로 만든 폴더에서 실행
+                from_file = f"{self.temp_folder_for_uml}/{file}"
+                # UML class diagram 이미지 저장할 폴더에 저장
+                to_img = f"{self.uml_img_path}/{file}.png"
+            # 단일 파일일 경우
             else:
-                file_java_exist = True
+                # 폴더명 생성
+                temp_file_name = file.replace(".java", "")
+                # 폴더 생성
+                if not os.path.exists(f"{self.temp_folder_for_uml}/{temp_file_name}"):
+                    os.mkdir(f"{self.temp_folder_for_uml}/{temp_file_name}")
+                shutil.copy(f"{self.path}/{file}", f"{self.temp_folder_for_uml}/{temp_file_name}/{file}")
 
-        # 리스트의 맨 앞에 추가
-        if file_java_exist:
-            temp_file_list_processing.insert(0, f"{file}.java")
-
-        # 테이블 작성
-        table = document.add_table(rows=1, cols=1)
-        table.style = "Table Grid"
-
-        # 설계
-        # temp_path 가 복사할 폴더
+                # 임시로 만든 폴더에서 실행
+                from_file = f"{self.temp_folder_for_uml}/{temp_file_name}"
+                # UML class diagram 이미지 저장할 폴더에 저장
+                to_img = f"{self.uml_img_path}/{temp_file_name}.png"
+            
+            # 이미지 다운로드 프로세스 생성
+            process = multiprocessing.Process(target=download_uml_class_diagram_img, args=(from_file, to_img))
+            process.start()
+            process_list.append(process)
+        
+        return process_list
+    
+    def make_java_response(self):
+        # 코드 결과값 저장할 폴더 생성
         try:
-            shutil.rmtree(file)
+            shutil.rmtree(self.java_response_path)
         except FileNotFoundError:
             pass
+        os.mkdir(self.java_response_path)
 
-        shutil.copytree(temp_path, file)
-        imgfile_name = get_uml_image(file)
-        img_path = f"{file}/{imgfile_name}"
+        process_list = []
 
-        if not os.path.exists(img_path):
-            try:
-                # 코드 합치기
-                code = get_code_for_uml(temp_path)
-                # 코드 변환
-                uml_result = str(Java2UML().JavaCode2UML(code))
+        for file in self.targets:
+            # 패키지일 경우
+            if not file.endswith(".java"):
+                if os.path.exists(f"{self.path}/{file}/{file}.java"):
+                    # 커맨드 가져오기 위해 코드 불러오기
+                    code_date = open(f"{self.path}/{file}/{file}.java", "r", encoding = 'UTF-8')
+                    code = code_date.read()
+                    code_date.close()
+                    
+                    # 코드에서 커맨드 가져오기
+                    _, command = get_command(code)
 
-                # UML 이미지 생성
-                img_path = get_uml_image_from_viz('temp', uml_result)
-            except:
-                img_path = None
+                    process = multiprocessing.Process(target=get_java_pk_response, args=(self.path, file, command, self.java_response_path))
+                    process.start()
+                    process_list.append(process)
+            
+            # 단일 파일일 경우
+            else:
+                if os.path.exists(f"{self.path}/{file}"):
+                    # 커맨드 가져오기 위해 코드 불러오기
+                    code_date = open(f"{self.path}/{file}", "r", encoding = 'UTF-8')
+                    code = code_date.read()
+                    code_date.close()
 
-        # 테이블에 UML class diagram 이미지 추가
-        hdr_cells = table.rows[0].cells
-        if img_path is not None and os.path.exists(img_path):
-            paragraph = hdr_cells[0].paragraphs[0]
-            run = paragraph.add_run()
-            run.add_picture(img_path, width=Cm(15))
-        else:
-            hdr_cells[0].text = f"설계 : UML class diagram - 이미지 생성 실패"
+                    # 코드에서 커맨드 가져오기
+                    _, command = get_command(code)
 
-        # 임시폴더 제거
-        try:
-            shutil.rmtree(file)
-        except FileNotFoundError:
-            pass
+                    process = multiprocessing.Process(target=get_java_response, args=(self.path, file, command, self.java_response_path))
+                    process.start()
+                    process_list.append(process)
+        
+        return process_list
+    
+    def make_document(self):
+        for file in self.targets:
+            temp_path = None
+            temp_file_list = None
 
-        if img_path is not None:
-            if os.path.exists(img_path):
-                os.remove(img_path)
+            self.document.add_page_break() # 다음 페이지로
 
-        # 테이블 내용 넣기
-        for i in enumerate(temp_file_list_processing):
-            code_date = open(f"{temp_path}/{i[1]}", "r", encoding = 'UTF-8')
-            code = code_date.read()
-            code_date.close()
+            # 문제 제목 뽑아내기
+            temp = file.split("_")
+            after_list = []
+            for i in temp:
+                after_list.append(re.sub(r'[^0-9]', '', i))
+            cell_title = ".".join(after_list)
 
-            if i[1] == f"{file}.java":
-                end_index, command = get_command(code)
-                result = ""
-                result = get_java_pk_response(path, file, command)
-                
+            # 문제 제목 넣기 - ex. 1.1
+            p = self.document.add_heading(level=1)
+            wp = p.add_run(cell_title)
+            wp.font.size = Pt(20) # 글자 크기 조절
+            wp.font.color.rgb = RGBColor(0, 0, 0) # 글자 색깔 검정색으로
+
+            # 파일이 패키지일 경우
+            if not file.endswith(".java"):
+                # 경로 설정
+                temp_path = f"{self.path}/{file}"
+                temp_file_list = get_file_list(temp_path)
+            
+                temp_file_list_processing = []
+                file_java_exist = False
+                for i in temp_file_list:
+                    # 만약 폴더명과 동일한 이름의 java 파일이 아닐 경우 추가 - 이를 리스트의 맨 위에 올리기 위함
+                    if i != f"{file}.java":
+                        temp_file_list_processing.append(i)
+                    else:
+                        file_java_exist = True
+
+                # 리스트의 맨 앞에 추가
+                if file_java_exist:
+                    temp_file_list_processing.insert(0, f"{file}.java")
+
+            # 테이블 작성
+            table = self.document.add_table(rows=1, cols=1)
+            table.style = "Table Grid"
+
+            # 테이블에 UML class diagram 이미지 추가
+            hdr_cells = table.rows[0].cells
+
+            if os.path.exists(f"{self.uml_img_path}/{file}.png".replace(".java", "")):
+                paragraph = hdr_cells[0].paragraphs[0]
+                run = paragraph.add_run()
+                run.add_picture(f"{self.uml_img_path}/{file}.png".replace(".java", ""), width=Cm(15))
+            else:
+                hdr_cells[0].text = f"설계 : UML class diagram - 이미지 생성 실패"
+
+            # 테이블에 코드 추가
+            # 패키지일 경우
+            if temp_path is not None:
+                for i in enumerate(temp_file_list_processing):
+                    # 코드 가져오기
+                    code_date = open(f"{temp_path}/{i[1]}", "r", encoding = 'UTF-8')
+                    code = code_date.read()
+                    code_date.close()
+
+                    # 커맨드 적은 주석 제거
+                    if i[1] == f"{file}.java":
+                        end_index, _ = get_command(code)
+
+                    if end_index is not None:
+                        temp_code = code.split("\n")
+                        code = "\n".join(temp_code[end_index+1:])
+
+                    row_cells = table.add_row().cells
+                    row_cells[0].text = f"//{i[1]}\n\n{code}"
+            else:
+                # 코드 가져오기
+                code_date = open(f"{self.path}/{file}", "r", encoding = 'UTF-8')
+                code = code_date.read()
+                code_date.close()
+
                 # 커맨드 적은 주석 제거
+                end_index, _ = get_command(code)
+
                 if end_index is not None:
                     temp_code = code.split("\n")
-                    code = "\n".join(temp_code[end_index+1:])
-
-            # 코드
+                    code = "\n".join(temp_code[end_index + 1:])
+                
+                row_cells = table.add_row().cells
+                row_cells[0].text = code
+            
+            # 결과값
             row_cells = table.add_row().cells
-            row_cells[0].text = f"//{i[1]}\n\n{code}"
+            image_path = f"{self.java_response_path}/{file}.png".replace(".java", "")
+            if os.path.exists(image_path):
+                paragraph = row_cells[0].paragraphs[0]
+                run = paragraph.add_run()
+                run.add_picture(image_path, width=Cm(15))
+            else:
+                row_cells[0].text = f"실행 결과 : 이미지 생성 실패"
+            
+            row_cells = table.add_row().cells
+            row_cells[0].text = f"난이도 : 중"
 
-        row_cells = table.add_row().cells
+            row_cells = table.add_row().cells
+            row_cells[0].text = f"완성도 : 정상 실행됨"
 
-        # 터미널로 속이기
-        print(result)
-        compile_command = get_compile_command(temp_path, file, result)
-
-        # 이미지 경로 가져오기
-        image_path = get_image(compile_command)
-
-        paragraph = row_cells[0].paragraphs[0]
-        run = paragraph.add_run()
-        run.add_picture(image_path, width=Cm(15))
-
-        if os.path.exists(image_path):
-            os.remove(image_path)
-        
-        row_cells = table.add_row().cells
-        row_cells[0].text = f"난이도 : 중"
-
-        row_cells = table.add_row().cells
-        row_cells[0].text = f"완성도 : 정상 실행됨"
-
-    else:
-        # 코드 가져오기
-        code_date = open(f"{temp_path}/{file}", "r", encoding = 'UTF-8')
-        code = code_date.read()
-        code_date.close()
-
-        end_index, command = get_command(code)
-        result = ""
-        result = get_java_response(temp_path, file, command)
-
-        # 커맨드 적은 주석 제거
-        if end_index is not None:
-            temp_code = code.split("\n")
-            code = "\n".join(temp_code[end_index + 1:])
-
-        # 테이블 작성
-        table = document.add_table(rows=1, cols=1)
-        table.style = "Table Grid"
-
-        # 설계
-        hdr_cells = table.rows[0].cells
-
-        # 설계
-        # temp_path 가 복사할 폴더
-        file_for_uml = file.split(".")[0]
-        try:
-            shutil.rmtree(file_for_uml)
-        except FileNotFoundError:
-            pass
-        os.mkdir(file_for_uml)
-        
-        shutil.copy(f"{temp_path}/{file}", file_for_uml)
-        imgfile_name = get_uml_image(file_for_uml)
-        img_path = f"{file_for_uml}/{imgfile_name}"
-
-        if not os.path.exists(img_path):
-            try:
-                # 코드 변환
-                uml_result = str(Java2UML().JavaCode2UML(code))
-
-                # UML 이미지 생성
-                img_path = get_uml_image_from_viz('temp.png', uml_result)
-            except:
-                img_path = None
-
-        # 테이블에 UML class diagram 이미지 추가
-        hdr_cells = table.rows[0].cells
-
-        if img_path is not None and os.path.exists(img_path):
-            paragraph = hdr_cells[0].paragraphs[0]
-            run = paragraph.add_run()
-            run.add_picture(img_path, width=Cm(15))
-        else:
-            hdr_cells[0].text = f"설계 : UML class diagram - 이미지 생성 실패"
-
+        self.document.save('result.docx')
+    
+    def finish_clear(self):
         # 임시폴더 제거
-        try:
-            shutil.rmtree(file_for_uml)
-        except FileNotFoundError:
-            pass
+        if os.path.exists(self.temp_folder_for_uml):
+            shutil.rmtree(self.temp_folder_for_uml)
 
-        if os.path.exists(img_path):
-            os.remove(img_path)
+        if os.path.exists(self.uml_img_path):
+            shutil.rmtree(self.uml_img_path)
 
-        # 코드
-        row_cells = table.add_row().cells
-        row_cells[0].text = code
-        
-        row_cells = table.add_row().cells
+        if os.path.exists(self.java_response_path):
+            shutil.rmtree(self.java_response_path)
 
-        # 터미널로 속이기
-        compile_command = get_compile_command(temp_path, file, result)
+if __name__ == "__main__":
+    main_class = Java2Docx()
 
-        # 이미지 경로 가져오기
-        image_path = get_image(compile_command)
+    # enable logging
+    logging.basicConfig(
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        level=logging.INFO)
+    main_class.LOGGER = logging.getLogger(__name__)
 
-        paragraph = row_cells[0].paragraphs[0]
-        run = paragraph.add_run()
-        run.add_picture(image_path, width=Cm(15))
+    os.system("java --version")
+    print()
+    main_class.LOGGER.info(f"javaToDocx Version {version}")
+    main_class.LOGGER.info("Made by @ajb3296")
+    print()
+    main_class.path = input("대상 경로를 입력하세요 : ").strip()
+    main_class.homework_name = input("과제명을 입력하세요 : ").strip()
 
-        if os.path.exists(image_path):
-            os.remove(image_path)
-        
-        row_cells = table.add_row().cells
-        row_cells[0].text = f"난이도 : 중"
+    start = time.time()
 
-        row_cells = table.add_row().cells
-        row_cells[0].text = f"완성도 : 정상 실행됨"
+    main_class.setup()
 
-    LOGGER.info(f"{file} - 작성 완료!")
+    # UML class diagram 이미지 생성 프로세스 실행
+    uml_process_list = main_class.make_uml_class_diagram()
 
-# 저장
-document.save('result.docx')
+    # 자바 실행 결과 이미지 생성 프로세스 실행
+    java_response_process_list = main_class.make_java_response()
+
+    # 프로세스 기다림
+    for process in uml_process_list:
+        process.join()
+    for process in java_response_process_list:
+        process.join()
+
+    main_class.make_document()
+
+    main_class.finish_clear()
+
+    main_class.LOGGER.info("완료")
+    main_class.LOGGER.info(f"소요시간 : {time.time() - start} 초")
