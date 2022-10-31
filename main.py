@@ -18,7 +18,7 @@ from utils.get_command import get_command
 from utils.get_java_response import get_java_response, get_java_pk_response
 from utils.uml import *
 
-version = "2.0.0"
+version = "2.0.1"
 
 class Java2Docx:
     def __init__(self):
@@ -41,7 +41,7 @@ class Java2Docx:
     def setup(self):
         # userdata 파일이 있을때
         if os.path.exists(self.userdata_path):
-            file = open(self.userdata_path, "r", encoding = 'UTF-8')
+            file = open(self.userdata_path, "r")
             data = file.read()
             file.close()
             json_object = json.loads(data)
@@ -56,7 +56,7 @@ class Java2Docx:
             self.studentID = input("학번을 입력하세요(ex. 20220101) : ").strip()
             self.name = input("이름을 입력하세요(ex. 홍길동) : ").strip()
 
-            file = open(self.userdata_path, "w", encoding = 'UTF-8')
+            file = open(self.userdata_path, "w")
             file.write(f"""{{
             "year": "{datetime.datetime.today().year}",
             "grade": "{self.grade}",
@@ -147,7 +147,7 @@ class Java2Docx:
             if not file.endswith(".java"):
                 if os.path.exists(f"{self.path}/{file}/{file}.java"):
                     # 커맨드 가져오기 위해 코드 불러오기
-                    code_date = open(f"{self.path}/{file}/{file}.java", "r", encoding = 'UTF-8')
+                    code_date = open(f"{self.path}/{file}/{file}.java", "r")
                     code = code_date.read()
                     code_date.close()
                     
@@ -162,7 +162,7 @@ class Java2Docx:
             else:
                 if os.path.exists(f"{self.path}/{file}"):
                     # 커맨드 가져오기 위해 코드 불러오기
-                    code_date = open(f"{self.path}/{file}", "r", encoding = 'UTF-8')
+                    code_date = open(f"{self.path}/{file}", "r")
                     code = code_date.read()
                     code_date.close()
 
@@ -233,7 +233,7 @@ class Java2Docx:
             if temp_path is not None:
                 for i in enumerate(temp_file_list_processing):
                     # 코드 가져오기
-                    code_date = open(f"{temp_path}/{i[1]}", "r", encoding = 'UTF-8')
+                    code_date = open(f"{temp_path}/{i[1]}", "r")
                     code = code_date.read()
                     code_date.close()
 
@@ -249,7 +249,7 @@ class Java2Docx:
                     row_cells[0].text = f"//{i[1]}\n\n{code}"
             else:
                 # 코드 가져오기
-                code_date = open(f"{self.path}/{file}", "r", encoding = 'UTF-8')
+                code_date = open(f"{self.path}/{file}", "r")
                 code = code_date.read()
                 code_date.close()
 
