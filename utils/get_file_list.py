@@ -6,7 +6,7 @@ def get_file_list(path):
     file_list = []
 
     for file in os.listdir(path):
-        if (file.endswith(".java") or os.path.isdir(f"{path}/{file}")) and file[0] != ".":
+        if (file.endswith(".java") or os.path.isdir(f"{path}/{file}") or file.endswith(".json")) and file[0] != ".":
             file_list.append(file)
 
     file_list = natsort.natsorted(file_list)

@@ -237,6 +237,8 @@ class Java2Docx:
                     code = code_date.read()
                     code_date.close()
 
+                    end_index = None
+
                     # 커맨드 적은 주석 제거
                     if i[1] == f"{file}.java":
                         end_index, _ = get_command(code)
@@ -253,6 +255,7 @@ class Java2Docx:
                 code = code_date.read()
                 code_date.close()
 
+                end_index = None
                 # 커맨드 적은 주석 제거
                 end_index, _ = get_command(code)
 
