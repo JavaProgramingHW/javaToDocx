@@ -4,10 +4,12 @@
 
 import os
 import re
+import sys
 import time
 import json
 import shutil
 import logging
+import platform
 import datetime
 import multiprocessing
 from docx import Document
@@ -19,6 +21,8 @@ from utils.get_java_response import get_java_response, get_java_pk_response
 from utils.uml import *
 
 version = "2.0.1"
+
+
 
 class Java2Docx:
     def __init__(self):
@@ -303,6 +307,11 @@ if __name__ == "__main__":
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         level=logging.INFO)
     main_class.LOGGER = logging.getLogger(__name__)
+
+    # check python version
+    if (sys.version_info[0] == 3 and (sys.version_info[1] > 10 or sys.version_info[1] < 6)) or sys.version_info[0] < 3:
+        main_class.LOGGER.error("파이썬 3.6 버전 이상, 3.10 버전 이하가 필요합니다.")
+        quit(1)
 
     os.system("java --version")
     print()
