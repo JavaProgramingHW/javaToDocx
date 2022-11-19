@@ -9,7 +9,6 @@ import time
 import json
 import shutil
 import logging
-import platform
 import datetime
 import multiprocessing
 from docx import Document
@@ -20,9 +19,7 @@ from utils.get_command import get_command
 from utils.get_java_response import get_java_response, get_java_pk_response
 from utils.uml import *
 
-version = "2.0.1"
-
-
+version = "2.0.2"
 
 class Java2Docx:
     def __init__(self):
@@ -60,7 +57,7 @@ class Java2Docx:
             self.studentID = input("학번을 입력하세요(ex. 20220101) : ").strip()
             self.name = input("이름을 입력하세요(ex. 홍길동) : ").strip()
 
-            file = open(self.userdata_path, "w")
+            file = open(self.userdata_path, "w", encoding="UTF8")
             file.write(f"""{{
             "year": "{datetime.datetime.today().year}",
             "grade": "{self.grade}",
@@ -230,7 +227,7 @@ class Java2Docx:
                 run = paragraph.add_run()
                 run.add_picture(f"{self.uml_img_path}/{file}.png".replace(".java", ""), width=Cm(15))
             else:
-                hdr_cells[0].text = f"설계 : UML class diagram - 이미지 생성 실패"
+                hdr_cells[0].text = "설계 : UML class diagram - 이미지 생성 실패"
 
             # 테이블에 코드 추가
             # 패키지일 경우
