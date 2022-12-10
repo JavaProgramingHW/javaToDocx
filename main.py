@@ -153,9 +153,9 @@ class Java2Docx:
                     code_date.close()
                     
                     # 코드에서 커맨드 가져오기
-                    _, command = get_command(code)
+                    parameter, _, command = get_command(code)
 
-                    process = multiprocessing.Process(target=get_java_pk_response, args=(self.path, file, command, self.java_response_path))
+                    process = multiprocessing.Process(target=get_java_pk_response, args=(self.path, file, parameter, command, self.java_response_path))
                     process.start()
                     process_list.append(process)
             
@@ -168,9 +168,9 @@ class Java2Docx:
                     code_date.close()
 
                     # 코드에서 커맨드 가져오기
-                    _, command = get_command(code)
+                    parameter, _, command = get_command(code)
 
-                    process = multiprocessing.Process(target=get_java_response, args=(self.path, file, command, self.java_response_path))
+                    process = multiprocessing.Process(target=get_java_response, args=(self.path, file, parameter, command, self.java_response_path))
                     process.start()
                     process_list.append(process)
         
@@ -242,7 +242,7 @@ class Java2Docx:
 
                     # 커맨드 적은 주석 제거
                     if i[1] == f"{file}.java":
-                        end_index, _ = get_command(code)
+                        _, end_index, _ = get_command(code)
 
                     if end_index is not None:
                         temp_code = code.split("\n")
@@ -258,7 +258,7 @@ class Java2Docx:
 
                 end_index = None
                 # 커맨드 적은 주석 제거
-                end_index, _ = get_command(code)
+                _, end_index, _ = get_command(code)
 
                 if end_index is not None:
                     temp_code = code.split("\n")

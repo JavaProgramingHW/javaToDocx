@@ -11,11 +11,11 @@ if platform.system() == "Windows":
 else:
     import pexpect
 
-def get_java_pk_response(path, file_name, command, java_response_path):
+def get_java_pk_response(path, file_name, parameter, command, java_response_path):
     result = ""
     child = pexpect.spawn(f'javac {file_name}/{file_name}.java', cwd=path)
     javac = child.read()
-    child = pexpect.spawn(f'java {file_name}/{file_name}', cwd=path, encoding='utf-8')
+    child = pexpect.spawn(f'java {file_name}/{file_name} {parameter if parameter is not None else ""}', cwd=path, encoding='utf-8')
 
     if command is not None:
         for msg in command:
@@ -37,9 +37,9 @@ def get_java_pk_response(path, file_name, command, java_response_path):
         shutil.copy(image_path, f"{java_response_path}/{file_name}.png")
         os.remove(image_path)
 
-def get_java_response(path, file_name, command, java_response_path):
+def get_java_response(path, file_name, parameter, command, java_response_path):
     result = ""
-    child = pexpect.spawn(f'java {file_name}', cwd=path, encoding='utf-8')
+    child = pexpect.spawn(f'java {file_name} {parameter if parameter is not None else ""}', cwd=path, encoding='utf-8')
 
     if command is not None:
         for msg in command:
