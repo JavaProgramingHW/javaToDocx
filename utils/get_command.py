@@ -4,9 +4,9 @@ def get_command(code):
     # 만약 맨 첫줄이 # 으로 시작하는 매개변수 코드라면
     parameter = None
     command_start_index = 0
-    if temp_code[0][0] == "#":
+    if temp_code[0][0:2] == "//":
         # 매개변수 코드
-        parameter = temp_code[0][1:]
+        parameter = temp_code[0][2:]
         command_start_index = 1
 
     if temp_code[command_start_index].replace(" ", "") == "/*":
