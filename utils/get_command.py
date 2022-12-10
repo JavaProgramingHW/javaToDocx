@@ -6,7 +6,7 @@ def get_command(code):
     command_start_index = 0
     if temp_code[0][0:2] == "//":
         # 매개변수 코드
-        parameter = temp_code[0][2:]
+        parameter = temp_code[0][2:].strip()
         command_start_index = 1
 
     if temp_code[command_start_index].replace(" ", "") == "/*":

@@ -1,7 +1,7 @@
 import getpass
 import platform
 
-def get_compile_command(path, file, result):
+def get_compile_command(path, file, parameter, result):
     path_for_print = ""
     path = path.replace("\\", "/")
     for i in enumerate(path.split("/")):
@@ -17,5 +17,5 @@ def get_compile_command(path, file, result):
         file = f"{file}/{file}"
 
     platform_node = platform.node().replace(".local", "")
-    result = f"{getpass.getuser()}@{platform_node} {result_path} $ java {file}\n{result}"
+    result = f"{getpass.getuser()}@{platform_node} {result_path} $ java {file} {parameter if parameter is not None else ''}\n{result}"
     return result

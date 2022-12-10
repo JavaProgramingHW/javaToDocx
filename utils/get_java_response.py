@@ -31,7 +31,7 @@ def get_java_pk_response(path, file_name, parameter, command, java_response_path
     print(result)
     print()
 
-    compile_command = get_compile_command(path, file_name, result)
+    compile_command = get_compile_command(path, file_name, parameter, result)
     image_path = get_image(compile_command)
     if image_path is not None and os.path.exists(image_path):
         shutil.copy(image_path, f"{java_response_path}/{file_name}.png")
@@ -55,7 +55,7 @@ def get_java_response(path, file_name, parameter, command, java_response_path):
 
     print(result)
 
-    compile_command = get_compile_command(path, file_name, result)
+    compile_command = get_compile_command(path, file_name, parameter, result)
     image_path = get_image(compile_command)
     if image_path is not None and os.path.exists(image_path):
         shutil.copy(image_path, f"{java_response_path}/{file_name}".replace(".java", ".png"))
