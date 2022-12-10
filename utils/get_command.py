@@ -8,6 +8,7 @@ def get_command(code):
         # 매개변수 코드
         parameter = temp_code[0][2:].strip()
         command_start_index = 1
+        end_index = 1
 
     if temp_code[command_start_index].replace(" ", "") == "/*":
         command_code = []
