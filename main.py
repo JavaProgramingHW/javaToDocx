@@ -19,7 +19,7 @@ from utils.get_command import get_command
 from utils.get_java_response import get_java_response, get_java_pk_response
 from utils.uml import *
 
-version = "2.0.2"
+version = "2.0.3"
 
 class Java2Docx:
     def __init__(self):
@@ -38,6 +38,7 @@ class Java2Docx:
         self.grade = None
         self.studentID = None
         self.name = None
+        self.subject_name = None
     
     def setup(self):
         # userdata 파일이 있을때
@@ -50,19 +51,22 @@ class Java2Docx:
                 self.grade = json_object["grade"]
                 self.studentID = json_object["studentID"]
                 self.name = json_object["name"]
+                self.subject_name = json_object["subject_name"]
 
         # userdata 파일이 없을때
         if self.name is None:
             self.grade = input("학년을 입력하세요(ex. 1) : ").strip()
             self.studentID = input("학번을 입력하세요(ex. 20220101) : ").strip()
             self.name = input("이름을 입력하세요(ex. 홍길동) : ").strip()
+            self.subject_name = input("과목명을 입력하세요(ex. 프로그래밍응용, 자바프로그래밍) : ").strip()
 
             file = open(self.userdata_path, "w", encoding="UTF8")
             file.write(f"""{{
             "year": "{datetime.datetime.today().year}",
             "grade": "{self.grade}",
             "studentID": "{self.studentID}",
-            "name": "{self.name}"
+            "name": "{self.name}",
+            "subject_name": "{self.subject_name}"
         }}
         """)
             file.close()
@@ -74,7 +78,7 @@ class Java2Docx:
         self.document = Document()
 
         p = self.document.add_heading(level=0)
-        wp = p.add_run("자바프로그래밍")
+        wp = p.add_run(self.subject_name)
         wp.font.color.rgb = RGBColor(0, 0, 0)
         p = self.document.add_heading(level=1)
         wp = p.add_run(self.homework_name)
@@ -146,9 +150,13 @@ class Java2Docx:
         for file in self.targets:
             # 패키지일 경우
             if not file.endswith(".java"):
-                if os.path.exists(f"{self.path}/{file}/{file}.java"):
+                main_java_file_path = f"{self.path}/{file}/{file}.java"
+                if os.path.exists(f"{self.path}/{file}/Main.java"):
+                    main_java_file_path = f"{self.path}/{file}/Main.java"
+
+                if os.path.exists(main_java_file_path):
                     # 커맨드 가져오기 위해 코드 불러오기
-                    code_date = open(f"{self.path}/{file}/{file}.java", "rt", encoding="UTF8")
+                    code_date = open(main_java_file_path, "rt", encoding="UTF8")
                     code = code_date.read()
                     code_date.close()
                     

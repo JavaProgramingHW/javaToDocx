@@ -4,11 +4,12 @@ test.py
 result.docx
 result.hwp
 ~$result.docx
-userdata.json
+*.json
 test.png
 umlimg
 temp
 console_img
+.vscode
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
