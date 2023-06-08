@@ -62,13 +62,13 @@ class Java2Docx:
 
             file = open(self.userdata_path, "w", encoding="UTF8")
             file.write(f"""{{
-            "year": "{datetime.datetime.today().year}",
-            "grade": "{self.grade}",
-            "studentID": "{self.studentID}",
-            "name": "{self.name}",
-            "subject_name": "{self.subject_name}"
-        }}
-        """)
+                "year": "{datetime.datetime.today().year}",
+                "grade": "{self.grade}",
+                "studentID": "{self.studentID}",
+                "name": "{self.name}",
+                "subject_name": "{self.subject_name}"
+            }}
+            """)
             file.close()
         
         self.targets = get_file_list(self.path)
